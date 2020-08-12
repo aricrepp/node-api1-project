@@ -50,12 +50,19 @@ server.delete('/api/users/:id', (req, res) => {
   const id = req.params.id;
   const user = db.getUserById(id);
 
-  if (user) {
-    db.deleteUser(id);
-    res.status(204).end();
-  } else {
-    res.status(404).json({
-      message: 'User not found',
+  try {
+    // throw new Error('Example Error');
+    if (user) {
+      db.deleteUser(id);
+      res.status(204).end();
+    } else {
+      res.status(404).json({
+        message: 'User not found',
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      errorMessage: 'The user could not be removed',
     });
   }
 });
@@ -65,15 +72,11 @@ server.put('/api/users/:id', (req, res) => {
   const user = db.getUserById(id);
 
   if (user) {
-    const updUser = db.updateUser({
+    const updUser = db.updateUser(id, {
       name: req.body.name,
       bio: req.body.bio,
     });
     res.status(200).json(updUser);
-  } else if (!user) {
-    res.status(404).json({
-      message: `Couldn't get the user`,
-    });
   } else if (
     req.body.name == undefined ||
     req.body.bio == undefined ||
